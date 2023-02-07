@@ -160,7 +160,7 @@
       </v-main>
 
       <v-navigation-drawer
-        v-if="showSidebar && false"
+        v-if="showSidebar"
         right
         permanent
         width="400"
@@ -199,12 +199,6 @@
             </v-list-item-action>
           </v-list-item>
 
-          <v-list-item class="mt-4 mb-4">
-            <v-list-item-title>
-              <h2>Сейчас играет</h2>
-            </v-list-item-title>
-          </v-list-item>
-
           <v-list-item class="mt-4">
             <TrackSingle
               class="mb-5"
@@ -229,7 +223,7 @@ export default {
   },
   data () {
     return {
-      showSidebar: true,
+      showSidebar: false,
       currentTrack: {
         artist: '',
         title: '',
@@ -304,6 +298,7 @@ export default {
   created() {
     this.$nuxt.$on('change-song', (track) => {
       this.changeTrack(track);
+			this.changeSidebar();
       console.log('change track event handle')
       console.log(track)
     })
@@ -317,6 +312,9 @@ export default {
     })
   },
   methods: {
+		changeSidebar () {
+			this.showSidebar = !this.showSidebar;
+		},
     changeTrack (track) {
       this.currentTrack = track;
     },
@@ -425,6 +423,10 @@ export default {
   .nav-item div.v-list-item__icon i {
     color: #272727;
   }
+
+	.v-navigation-drawer__content {
+		background-color: #f6f6f6;
+	}
 
   .music-player {
 
