@@ -16,7 +16,7 @@
     </div>
 
     <section
-      v-if="!loading"
+			v-if="!loading"
       class="track"
       :class="{ 'full-width': wide, 'flat': wide, 'padless': history }"
     >
@@ -144,8 +144,12 @@
         type: Boolean,
         default: false
       },
-      track: {
-        type: Object,
+      tracks: {
+        type: Array,
+        required: true
+      },
+			currentSound: {
+        type: Number,
         required: true
       },
       history: {
@@ -171,6 +175,14 @@
     },
     data () {
       return {
+				track: {
+					artist: '',
+					title: '',
+					avatar: '',
+					plays: '',
+					duration: ''
+				},
+				trackLength: 0,
         loading: true,
         playing: false,
         paused: false,
@@ -203,10 +215,7 @@
       }
     },
     mounted () {
-			setTimeout(() => {
-				this.loading = false;
-				this.init();
-			}, 1500)
+			this.init();
     },
     methods: {
 			back(time) {
@@ -284,47 +293,53 @@
         this.paused = true;
         this.playing = false;
       },
-      init: function () {
-        this.elapsed = 0;
+			createSound(track) {
+				this.track = track;
+				this.loading = true;
+
+				this.elapsed = 0;
         this.totalDuration = 0;
 
-        clearInterval(this.updateTimeIntervalId);
+				clearInterval(this.updateTimeIntervalId);
 
-        if (this.sound) {
+				if (this.sound) {
+					this.sound.unload();
           this.sound = null;
         }
 
-        this.sound = new Howl({
-          src: [this.track.source],
+				this.sound = new Howl({
+          src: track.source,
           html5: true,
+					onend: () => {
+						if (this.playing && this.repeated) {
+							this.elapsed = 0;
+							this.sound.seek(0);
+						} else if (this.playing && !this.repeated) {
+							this.currentSound = (this.currentSound === this.trackLength - 1) ? 0 : this.currentSound + 1;
+							this.createSound(this.tracks[this.currentSound]);
+						}
+      	  }
         });
 
-        if (this.autoplay) {
-          this.play();
-        }
-
-        this.totalDuration = this.track.duration;
+				this.totalDuration = track.duration;
         this.elapsed = this.elapsed;
 
         this.updateTimeIntervalId = setInterval(this.updateClock, 1000);
 
-        this.loading = false;
+				this.sound.once('load', () => {
+					this.loading = false;
+					if (this.autoplay) {
+						this.play();
+					}
+				});
+			},
+      init: function () {
+				this.trackLength = this.tracks.length;
+				this.createSound(this.tracks[this.currentSound]);
       },
       updateClock () {
-				if(this.playing && !this.repeated) {
+				if(this.playing) {
 					this.elapsed++;
-
-					if (this.elapsed >= Math.floor(this.sound._duration)) {
-						clearInterval(this.updateTimeIntervalId);
-						this.stop();
-					}
-				} else if (this.playing && this.repeated) {
-					this.elapsed++;
-
-					if (this.elapsed >= Math.floor(this.sound._duration)) {
-						this.elapsed = 0;
-						this.sound.seek(0);
-					}
 				}
       }
     }

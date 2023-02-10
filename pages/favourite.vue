@@ -67,7 +67,7 @@
                     />
                     <div
                       class="avatar-hover"
-                      @click="play(item)"
+                      @click="play(index, showLiked ? liked : notLiked)"
                     >
                       <v-icon>mdi-play</v-icon>
                     </div>
@@ -233,8 +233,8 @@ export default {
     }
   },
   methods: {
-    play (item) {
-      this.$nuxt.$emit('change-song', item);
+    play (index, tracks) {
+      this.$nuxt.$emit('change-song', index, tracks);
     }
   }
 }

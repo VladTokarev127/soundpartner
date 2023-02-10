@@ -165,6 +165,13 @@
         permanent
         width="400"
       >
+				<v-icon
+					class="close-sidebar"
+					color="#2256F6"
+					@click="showSidebar = false"
+				>
+					mdi-close
+				</v-icon>
         <v-list class="music-player">
           <v-list-item class="mb-4">
             <v-list-item-title>
@@ -173,7 +180,7 @@
           </v-list-item>
 
           <v-list-item
-            v-for="(track, index) in tracks"
+            v-for="(track, index) in currentTracks"
             :key="track.title + index"
           >
             <v-list-item-avatar>
@@ -204,7 +211,9 @@
               class="mb-5"
               wide
               autoplay
-              :track="currentTrack"
+              :tracks="currentTracks"
+							:currentSound="currentTrack"
+							:key="componentKey"
             />
           </v-list-item>
         </v-list>
@@ -224,13 +233,10 @@ export default {
   data () {
     return {
       showSidebar: false,
-      currentTrack: {
-        artist: '',
-        title: '',
-        avatar: '',
-        plays: '',
-        duration: ''
-      },
+			currentTracks: [],
+			currentTrack: 0,
+			componentKey: 0,
+			sound: null,
       items1: [
         { title: 'Главная', icon: 'mdi-home', route: '/dashboard' },
         { title: 'Обзор', icon: 'mdi-view-dashboard', route: '/review' },
@@ -296,11 +302,12 @@ export default {
     }
   },
   created() {
-    this.$nuxt.$on('change-song', (track) => {
-      this.changeTrack(track);
-			this.changeSidebar();
+    this.$nuxt.$on('change-song', (index, tracks) => {
+      this.changeTracks(tracks);
+      this.changeTrack(index);
+			this.showSidebar = true;
+			this.forceRerender();
       console.log('change track event handle')
-      console.log(track)
     })
 
     this.$nuxt.$on('hide-sidebar', () => {
@@ -315,8 +322,14 @@ export default {
 		changeSidebar () {
 			this.showSidebar = !this.showSidebar;
 		},
-    changeTrack (track) {
-      this.currentTrack = track;
+    changeTracks (tracks) {
+      this.currentTracks = tracks;
+    },
+		changeTrack (index) {
+      this.currentTrack = index;
+    },
+		forceRerender() {
+      this.componentKey += 1;  
     },
     logout () {
       console.info('LOGOUT');
@@ -426,6 +439,22 @@ export default {
 
 	.v-navigation-drawer__content {
 		background-color: #f6f6f6;
+		padding-top: 36px;
+		padding-right: 20px;
+	}
+
+	.close-sidebar.v-icon.v-icon {
+		margin-left: auto;
+		margin-right: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		width: 46px;
+		height: 46px;
+		border-radius: 12px;
+		background-color: #fff;
+		overflow: hidden;
 	}
 
   .music-player {
