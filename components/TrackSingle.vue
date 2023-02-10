@@ -294,6 +294,7 @@
         this.playing = false;
       },
 			createSound(track) {
+				Howler.unload()
 				this.track = track;
 				this.loading = true;
 
@@ -303,7 +304,6 @@
 				clearInterval(this.updateTimeIntervalId);
 
 				if (this.sound) {
-					this.sound.unload();
           this.sound = null;
         }
 
