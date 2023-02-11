@@ -150,7 +150,7 @@
       },
 			currentSound: {
         type: Number,
-        required: true
+				required: true
       },
       history: {
         type: Boolean,
@@ -182,7 +182,6 @@
 					plays: '',
 					duration: ''
 				},
-				trackLength: 0,
         loading: true,
         playing: false,
         paused: false,
@@ -295,6 +294,7 @@
       },
 			createSound(track) {
 				Howler.unload()
+				if (!this.tracks) return
 				this.track = track;
 				this.loading = true;
 
@@ -315,7 +315,7 @@
 							this.elapsed = 0;
 							this.sound.seek(0);
 						} else if (this.playing && !this.repeated) {
-							this.currentSound = (this.currentSound === this.trackLength - 1) ? 0 : this.currentSound + 1;
+							this.currentSound = (this.currentSound === this.tracks.length - 1) ? 0 : this.currentSound + 1;
 							this.createSound(this.tracks[this.currentSound]);
 						}
       	  }
@@ -334,7 +334,6 @@
 				});
 			},
       init: function () {
-				this.trackLength = this.tracks.length;
 				this.createSound(this.tracks[this.currentSound]);
       },
       updateClock () {

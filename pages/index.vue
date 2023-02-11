@@ -35,7 +35,7 @@
             xs="12"
           >
             <div class="hero-music">
-              <TrackSingle
+              <!-- <TrackSingle
                 class="mb-5"
                 :track="track"
               />
@@ -50,7 +50,7 @@
               <TrackSingle
                 class="mb-5"
                 :track="track"
-              />
+              /> -->
             </div>
             <div class="d-flex justify-center">
               <v-btn

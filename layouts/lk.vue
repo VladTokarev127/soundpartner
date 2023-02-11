@@ -168,7 +168,7 @@
 				<v-icon
 					class="close-sidebar"
 					color="#2256F6"
-					@click="showSidebar = false"
+					@click="closeSidebar"
 				>
 					mdi-close
 				</v-icon>
@@ -179,35 +179,42 @@
             </v-list-item-title>
           </v-list-item>
 
-          <v-list-item
-            v-for="(track, index) in currentTracks"
-            :key="track.title + index"
-          >
-            <v-list-item-avatar>
-              <v-img
-                min-height="56"
-                min-width="56"
-                max-height="56"
-                max-width="56"
-                :src="track.avatar"
-                style="background: #D9D9D9; border-radius: 5px;"
-              />
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title>{{ track.title }}</v-list-item-title>
-              <v-list-item-subtitle>{{ track.artist }}</v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-btn icon>
-                <v-icon color="grey lighten-1">
-                  mdi-dots-vertical
-                </v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
+					<v-virtual-scroll
+						v-if="currentTracks"
+						:items="currentTracks"
+						height="208"
+						item-height="56"
+					>
+					<template v-slot:default="{ item }">
+						<v-list-item :key="item.title">
+							<v-list-item-avatar>
+								<v-img
+									min-height="56"
+									min-width="56"
+									max-height="56"
+									max-width="56"
+									:src="item.avatar"
+									style="background: #D9D9D9; border-radius: 5px;"
+								/>
+							</v-list-item-avatar>
+							<v-list-item-content>
+								<v-list-item-title>{{ item.title }}</v-list-item-title>
+								<v-list-item-subtitle>{{ item.artist }}</v-list-item-subtitle>
+							</v-list-item-content>
+							<v-list-item-action>
+								<v-btn icon>
+									<v-icon color="grey lighten-1">
+										mdi-dots-vertical
+									</v-icon>
+								</v-btn>
+							</v-list-item-action>
+						</v-list-item>
+					</template>
+					</v-virtual-scroll>
 
           <v-list-item class="mt-4">
             <TrackSingle
+							v-if="currentTracks"
               class="mb-5"
               wide
               autoplay
@@ -224,6 +231,7 @@
 
 <script>
 import TrackSingle from '@/components/TrackSingle.vue'
+import { Howl } from 'howler'
 
 export default {
   name: 'LKLayout',
@@ -233,7 +241,7 @@ export default {
   data () {
     return {
       showSidebar: false,
-			currentTracks: [],
+			currentTracks: null,
 			currentTrack: 0,
 			componentKey: 0,
 			sound: null,
@@ -312,6 +320,7 @@ export default {
 
     this.$nuxt.$on('hide-sidebar', () => {
       this.showSidebar = false;
+			Howler.unload();
     })
 
     this.$nuxt.$on('show-sidebar', () => {
@@ -321,6 +330,10 @@ export default {
   methods: {
 		changeSidebar () {
 			this.showSidebar = !this.showSidebar;
+		},
+		closeSidebar () {
+			this.showSidebar = false;
+			Howler.unload();
 		},
     changeTracks (tracks) {
       this.currentTracks = tracks;
