@@ -182,19 +182,24 @@
 					<v-virtual-scroll
 						v-if="currentTracks"
 						:items="currentTracks"
-						height="208"
-						item-height="56"
+						height="214"
+						item-height="76"
 					>
 					<template v-slot:default="{ item }">
 						<v-list-item :key="item.title">
-							<v-list-item-avatar>
+							<v-list-item-avatar
+								min-height="56"
+								min-width="56"
+								max-height="56"
+								max-width="56"
+								style="background: #D9D9D9; border-radius: 5px;"
+								>
 								<v-img
 									min-height="56"
 									min-width="56"
 									max-height="56"
 									max-width="56"
 									:src="item.avatar"
-									style="background: #D9D9D9; border-radius: 5px;"
 								/>
 							</v-list-item-avatar>
 							<v-list-item-content>
@@ -213,7 +218,7 @@
 					</v-virtual-scroll>
 
           <v-list-item class="mt-4">
-            <TrackSingle
+            <Player
 							v-if="currentTracks"
               class="mb-5"
               wide
@@ -230,13 +235,13 @@
 </template>
 
 <script>
-import TrackSingle from '@/components/TrackSingle.vue'
+import Player from '@/components/Player.vue'
 import { Howl } from 'howler'
 
 export default {
   name: 'LKLayout',
   components: {
-    TrackSingle
+    Player
   },
   data () {
     return {
@@ -468,6 +473,28 @@ export default {
 		border-radius: 12px;
 		background-color: #fff;
 		overflow: hidden;
+	}
+
+	.v-list-item__avatar {
+		margin: 0;
+	}
+
+	.v-list-item__title,
+	.v-list-item__subtitle {
+		font-size: 18px;
+		line-height: 1.25;
+	}
+
+	.v-virtual-scroll__item {
+		padding-bottom: 20px;
+
+		&:last-child {
+			padding-bottom: 0
+		}
+	}
+
+	.v-application--is-ltr .v-list-item__avatar:first-child {
+		margin-right: 27px;
 	}
 
   .music-player {

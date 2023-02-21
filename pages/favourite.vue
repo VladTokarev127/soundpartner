@@ -18,27 +18,6 @@
         <h2>
           Понравившиеся треки
         </h2>
-        <div>
-          <v-btn
-            :color="showLiked ? '#2256F6' : '#D9E2FF'"
-            text
-            style="font-weight: 600; font-size: 18px; line-height: 22px; text-transform: none; letter-spacing: normal;"
-            @click="showLiked = true"
-          >
-            Понравились
-          </v-btn>
-
-          <span style="font-weight: 600; font-size: 18px; line-height: 22px; text-transform: none; letter-spacing: normal; color: #2256F6;">|</span>
-
-          <v-btn
-            :color="!showLiked ? '#2256F6' : '#D9E2FF'"
-            text
-            style="font-weight: 600; font-size: 18px; line-height: 22px; text-transform: none; letter-spacing: normal;"
-            @click="showLiked = false"
-          >
-            Не понравились
-          </v-btn>
-        </div>
       </div>
 
       <v-row>

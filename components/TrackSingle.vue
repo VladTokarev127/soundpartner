@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 100%">
+  <div>
     <div
       v-if="loading"
       class="content-container"
@@ -16,114 +16,77 @@
     </div>
 
     <section
-			v-if="!loading"
+      v-if="!loading"
       class="track"
       :class="{ 'full-width': wide, 'flat': wide, 'padless': history }"
     >
-      <div class="player">
-				<div class="player__img">
-					<v-img
-						min-height="165"
-						min-width="165"
-						max-height="165"
-						max-width="165"
-						:src="track.avatar"
-						style="background: #D9D9D9; border-radius: 5px;"
-					/>
-				</div>
-				<div class="player__container d-flex flex-wrap">
-					<div class="player__disliked">
-						<v-icon
-							color="#2256F6"
-							@click="track.liked = false"
-						>
-							mdi-heart-off-outline
-						</v-icon>
-					</div>
-					<div class="player__info">
-						<div class="player__title">{{ track.title }}</div>
-						<div class="player__artist">{{ track.artist }}</div>
-					</div>
-					<div class="player__liked">
-						<v-icon
-							color="#2256F6"
-							@click="track.liked = true"
-						>
-							mdi-heart
-						</v-icon>
-					</div>
-					<div class="player__progress">
-						<div class="player__progress-line">
-							<div 
-								class="player__progress-width"
-								:style="{width: progress + '%'}"
-							></div>
-							<div 
-								class="player__handler"
-								:style="{left: progress + '%'}"
-								@drag="drag"
-							></div>
-						</div>
-						<div class="player__time player__time_current">
-							{{ elapsedTime ? elapsedTime : '00:00' }}
-						</div>
-						<div class="player__time player__time_duration">
-							{{ duration }}
-						</div>
-					</div>
-					<div class="player__controls">
-						<div class="player__shuffle">
-							<v-icon
-								color="#2256F6"
-								@click="shuffle = !shuffle"
-							>
-								mdi-shuffle-variant
-							</v-icon>
-						</div>
-						<div class="player__controls-main">
-							<v-icon
-								class="player__arrow"
-								color="#2256F6"
-								@click="back(elapsed - 5)"
-							>
-								mdi-chevron-double-left
-							</v-icon>
-							<v-icon
-								v-if="!playing"
-								class="player__play"
-								color="#fff"
-								@click="play"
-							>
-								{{ playIcon }}
-							</v-icon>
-							<v-icon
-								v-else
-								class="player__play"
-								color="#fff"
-								@click="pause"
-							>
-								{{ pauseIcon }}
-							</v-icon>
-							<v-icon
-								class="player__arrow"
-								color="#2256F6"
-								@click="forward(elapsed + 5)"
-							>
-								mdi-chevron-double-right
-							</v-icon>
-						</div>
-						<div class="player__repeat">
-							<v-icon
-								color="#2256F6"
-								:class="repeated ? 'is-active' : ''"
-								@click="repeated = !repeated"
-							>
-								mdi-repeat
-							</v-icon>
-						</div>
-					</div>
-				</div>
-			</div>
+      <div
+        class="d-flex"
+      >
+        <img
+          :src="track.song.art"
+          width="56"
+          height="56"
+          alt="ALBUM"
+          class="mr-3"
+        >
+
+        <div style="flex: 1;">
+          <h3>{{ title }}</h3>
+          <p>{{ artist }}</p>
+        </div>
+
+        <div
+          v-if="playing"
+          id="levels"
+        >
+          <div class="level level1" />
+          <div class="level level2" />
+          <div class="level level3" />
+          <div class="level level4" />
+          <div class="level level5" />
+          <div class="level level6" />
+          <div class="level level7" />
+          <div class="level level8" />
+          <div class="level level9" />
+        </div>
+
+        <div
+          v-if="history"
+        >
+          <span class="duration">{{ duration }}</span>
+        </div>
+      </div>
+
+      <div
+        v-if="!history"
+        class="params mt-2"
+      >
+        <v-btn
+          v-if="!history"
+          class="control-btn"
+          icon
+          :color="color"
+          :disabled="loading"
+          @click="playing ? pause() : play()"
+        >
+          <v-icon v-if="!playing || paused">
+            {{ playIcon }}
+          </v-icon>
+          <v-icon v-else>
+            {{ pauseIcon }}
+          </v-icon>
+        </v-btn>
+        <v-progress-linear
+          v-model="progress"
+          height="2"
+          class="mx-4 mt-1"
+          disabled
+        />
+        <!-- <span class="duration">{{ elapsedTime }}</span>
+        <span> / </span> -->
+        <span class="duration">{{ duration }}</span>
+      </div>
     </section>
   </div>
 </template>
@@ -144,13 +107,9 @@
         type: Boolean,
         default: false
       },
-      tracks: {
-        type: Array,
+      track: {
+        type: Object,
         required: true
-      },
-			currentSound: {
-        type: Number,
-				required: true
       },
       history: {
         type: Boolean,
@@ -175,19 +134,10 @@
     },
     data () {
       return {
-				track: {
-					artist: '',
-					title: '',
-					avatar: '',
-					plays: '',
-					duration: ''
-				},
         loading: true,
         playing: false,
         paused: false,
         sound: null,
-				repeated: false,
-        elapsed: 0,
         totalDuration: 0,
         playerVolume: 1,
         updateTimeIntervalId: null
@@ -195,77 +145,34 @@
     },
     computed: {
       duration: function () {
-        return this.sound._duration ? formatTime(this.sound._duration) : ''
+        return this.track.duration ? formatTime(this.track.duration) : ''
       },
       elapsedTime: function () {
-        return this.elapsed ? formatTime(this.elapsed) : ''
+        return this.track.elapsed ? formatTime(this.track.elapsed) : ''
       },
       source () {
-        return this.track.source;
+        return this.track.song.listen_url;
       },
       title () {
-        return this.track.title;
+        return this.track.song.title;
       },
       artist () {
-        return this.track.artist;
+        return this.track.song.artist;
       },
       progress () {
-        return parseInt((this.elapsed / this.sound._duration) * 100)
+        return parseInt((this.track.elapsed / this.track.duration) * 100)
       }
     },
     mounted () {
-			this.init();
+      if (this.track?.sh_id) {
+        this.init();
+      }
+
+      if (this.history) {
+        this.loading = false;
+      }
     },
     methods: {
-			back(time) {
-				time = time <= 0 ? 0 : time;
-				this.sound.seek(time);
-				this.elapsed = time;
-			},
-			forward(time) {
-				time = time >= this.sound._duration ? this.sound._duration : time;
-				this.sound.seek(time);
-				this.elapsed = time;
-			},
-			drag(event) {
-				let time = 0, pos1 = 0, pos2 = 0, progress = 0, progressPosition = 0, progressLineWidth = event.target.parentElement.offsetWidth;
-				event.target.onmousedown = dragMouseDown;
-
-				function dragMouseDown(e) {
-					console.log(e);
-					e = e || window.event;
-					e.preventDefault();
-					pos2 = e.clientX;
-					document.onmouseup = closeDragElement;
-					document.onmousemove = elementDrag;
-				}
-
-				let elementDrag = (e) => {
-					e = e || window.event;
-					e.preventDefault();
-					let start = event.target.parentElement.getBoundingClientRect().x;
-					let end = event.target.parentElement.getBoundingClientRect().x + progressLineWidth;
-					pos1 = pos2 - start;
-					pos2 = e.clientX;
-					if(pos2 <= start) {
-						progressPosition = 0;
-					} else if (pos2 >= end) {
-						progressPosition = (progressLineWidth) + "px";
-					} else {
-						progressPosition = pos1 + "px";
-					}
-					progress = (parseInt(progressPosition) / progressLineWidth) * 100;
-					time = this.sound._duration * (progress / 100);
-					this.sound.seek(time);
-					this.elapsed = time;
-				}
-
-				function closeDragElement() {
-					// stop moving when mouse button is released:
-					document.onmouseup = null;
-					document.onmousemove = null;
-				}
-			},
       play () {
         if (!this.sound) return;
 
@@ -282,64 +189,38 @@
         this.paused = true;
         this.playing = false;
       },
-			stop () {
-        if (!this.sound) return;
-
-        this.sound.stop();
-				this.autoplay = false;
-				this.init();
-
-        this.paused = true;
-        this.playing = false;
-      },
-			createSound(track) {
-				Howler.unload()
-				if (!this.tracks) return
-				this.track = track;
-				this.loading = true;
-
-				this.elapsed = 0;
+      init: function () {
+        this.elapsed = 0;
         this.totalDuration = 0;
 
-				clearInterval(this.updateTimeIntervalId);
+        clearInterval(this.updateTimeIntervalId);
 
-				if (this.sound) {
+        if (this.sound) {
           this.sound = null;
         }
 
-				this.sound = new Howl({
-          src: track.source,
+        this.sound = new Howl({
+          src: [this.track.listen_url],
           html5: true,
-					onend: () => {
-						if (this.playing && this.repeated) {
-							this.elapsed = 0;
-							this.sound.seek(0);
-						} else if (this.playing && !this.repeated) {
-							this.currentSound = (this.currentSound === this.tracks.length - 1) ? 0 : this.currentSound + 1;
-							this.createSound(this.tracks[this.currentSound]);
-						}
-      	  }
         });
 
-				this.totalDuration = track.duration;
-        this.elapsed = this.elapsed;
+        if (this.autoplay) {
+          this.play();
+        }
+
+        this.totalDuration = this.track.duration;
+        this.elapsed = this.track.elapsed;
 
         this.updateTimeIntervalId = setInterval(this.updateClock, 1000);
 
-				this.sound.once('load', () => {
-					this.loading = false;
-					if (this.autoplay) {
-						this.play();
-					}
-				});
-			},
-      init: function () {
-				this.createSound(this.tracks[this.currentSound]);
+        this.loading = false;
       },
       updateClock () {
-				if(this.playing) {
-					this.elapsed++;
-				}
+        this.elapsed++;
+
+        if (this.elapsed >= this.totalDuration) {
+          clearInterval(this.updateTimeIntervalId);
+        }
       }
     }
   }
@@ -383,133 +264,13 @@
     }
   }
 
-	.player {
-		padding: 25px 30px 37px;
-		background: #FFFFFF;
-		border-radius: 20px;
-
-		&__img {
-			display: flex;
-			justify-content: center;
-			margin-bottom: 10px;
-		}
-
-		&__info {
-			flex: 1;
-			text-align: center;
-			padding: 0 15px;
-		}
-
-		&__title {
-			font-size: 18px;
-			line-height: 1.25;
-			font-weight: 700;
-			margin-bottom: 7px;
-		}
-
-		&__artist {
-			font-size: 18px;
-			line-height: 1.25;
-			font-weight: 300;
-		}
-
-		&__progress {
-			margin-top: 40px;
-			flex: 1 100%;
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: space-between;
-
-			&-line {
-				flex: 1 100%;
-				position: relative;
-				height: 1px;
-				background: #000000;
-				margin: 0 15px 8px;
-			}
-
-			&-width {
-				position: absolute;
-				left: 0;
-				top: 50%;
-				transform: translate(0,-50%);
-				height: 3px;
-				background: #2256F6;
-			}
-		}
-
-		&__handler {
-			position: absolute;
-			cursor: grab;
-			top: 50%;
-			transform: translate(0,-50%);
-			width: 9px;
-			height: 9px;
-			border-radius: 50%;
-			background: #2256F6;
-		}
-
-		&__time {
-			font-size: 14px;
-			font-weight: 300;
-		}
-
-		&__controls {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex: 1 100%;
-			max-width: 230px;
-			margin: 0 auto;
-
-			&-main {
-				margin: 0 27px;
-				display: flex;
-				align-items: center;
-			}
-		}
-
-		&__shuffle {
-			font-size: 22px;
-			line-height: 1;
-		}
-		
-		&__repeat {
-			font-size: 22px;
-			line-height: 1;
-
-			button:focus::after {
-				opacity: 0;
-			}
-			button.is-active::after {
-				opacity: 0.12;
-			}
-		}
-
-		&__arrow {
-			font-size: 21px;
-			line-height: 1;
-		}
-
-		&__play {
-			width: 40px;
-			height: 40px;
-			border-radius: 50%;
-			background-color: #2256f6;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin: 0 23px;
-		}
-	}
-
   .track {
     background: #FFFFFF;
     box-shadow: 0px 4px 34px rgba(0, 0, 0, 0.18);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    // padding: 16px;
+    padding: 16px;
 
     &.full-width {
       width: 100%;
